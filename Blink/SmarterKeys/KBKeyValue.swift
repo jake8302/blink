@@ -81,6 +81,7 @@ enum KBKeyValue: Hashable, Identifiable, Codable {
   case copy
   case paste
   case hideKB
+  case mic
   case text(value: String)
   case f(Int8)
   
@@ -98,6 +99,7 @@ enum KBKeyValue: Hashable, Identifiable, Codable {
     case .copy:   return "copy"
     case .paste:  return "paste"
     case .hideKB: return "hideKB"
+    case .mic: return "mic"
     case .text(let value): return value
     case .f(let value): return "F\(value)"
     }
@@ -130,6 +132,7 @@ enum KBKeyValue: Hashable, Identifiable, Codable {
       case 12: return .f12
       default: return .unidentified
       }
+    case .mic: return .unidentified
     case .text(value: let ch):
       switch ch {
       case "`", "~": return .backquote
@@ -161,6 +164,7 @@ enum KBKeyValue: Hashable, Identifiable, Codable {
     case .tab: return "Tab"
     case .up: return "Up"
     case .hideKB: return "Hide Keyboard"
+    case .mic: return "Dictation"
     case .text(let value): return value
     case .f(let value): return "F\(value)"
     }
@@ -183,6 +187,7 @@ enum KBKeyValue: Hashable, Identifiable, Codable {
     case .down: return UIKeyCommand.inputDownArrow
     case .tab: return "\t"
     case .hideKB: return "hideKeyboard"
+    case .mic: return "toggleDictation"
     default: return nil
     }
   }
@@ -204,6 +209,7 @@ enum KBKeyValue: Hashable, Identifiable, Codable {
     case .copy:   return "doc.on.doc"
     case .paste:  return "doc.on.clipboard"
     case .hideKB: return "keyboard.chevron.compact.down"
+    case .mic: return "mic.fill"
     default:      return nil
     }
   }
@@ -219,7 +225,7 @@ enum KBKeyValue: Hashable, Identifiable, Codable {
   }
   
   static var specials: [Self] {
-    [.cmd, .alt, .ctrl, .esc, .tab, .left, .right, .up, .down, .copy, .paste, .hideKB]
+    [.cmd, .alt, .ctrl, .esc, .tab, .left, .right, .up, .down, .copy, .paste, .hideKB, .mic]
   }
   
   var isModifier: Bool {
@@ -231,7 +237,7 @@ enum KBKeyValue: Hashable, Identifiable, Codable {
 
   var isCommand: Bool {
     switch self {
-    case .hideKB: return true
+    case .hideKB, .mic: return true
     default: return false
     }
   }

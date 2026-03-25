@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		04119E7A2F73442A00539B33 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 04119E792F73442A00539B33 /* WhisperKit */; };
+		04119E7E2F7344A700539B33 /* KBKeyValue+Mic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04119E7D2F7344A700539B33 /* KBKeyValue+Mic.swift */; };
+
+		04119E832F7344C900539B33 /* DictationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04119E802F7344C900539B33 /* DictationManager.swift */; };
+		04119E842F7344C900539B33 /* DictationSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04119E812F7344C900539B33 /* DictationSettings.swift */; };
+		FDA7900EF5214C580CB4A947 /* AudioWaveformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA7900EF5214C570CB4A947 /* AudioWaveformView.swift */; };
 		0716B5721CFFAB9300268B5B /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0716B52A1CFFAB9300268B5B /* AppDelegate.m */; };
 		0716B5741CFFAB9300268B5B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0716B52C1CFFAB9300268B5B /* LaunchScreen.storyboard */; };
 		0732F04D1D062B9A00AB5438 /* locales.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 0732F04A1D062B9A00AB5438 /* locales.bundle */; };
@@ -760,6 +766,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		04119E7D2F7344A700539B33 /* KBKeyValue+Mic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "KBKeyValue+Mic.swift"; path = "Blink/SmarterKeys/KBKeyValue+Mic.swift"; sourceTree = "<group>"; };
+
+		FDA7900EF5214C570CB4A947 /* AudioWaveformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AudioWaveformView.swift; path = "Blink/Dictation/AudioWaveformView.swift"; sourceTree = "<group>"; };
+		04119E802F7344C900539B33 /* DictationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DictationManager.swift; path = "Blink/Dictation/DictationManager.swift"; sourceTree = "<group>"; };
+		04119E812F7344C900539B33 /* DictationSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DictationSettings.swift; path = "Blink/Dictation/DictationSettings.swift"; sourceTree = "<group>"; };
 		0716B5291CFFAB9300268B5B /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		0716B52A1CFFAB9300268B5B /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		0716B52D1CFFAB9300268B5B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -1405,6 +1416,7 @@
 				BDF2B8DD2BC48D2800B9C7EA /* LibSSH.xcframework in Frameworks */,
 				D2334EFA25C1C28F00385378 /* network_ios.xcframework in Frameworks */,
 				D2A6398928CFA0B90066FD18 /* SwiftCBOR in Frameworks */,
+				04119E7A2F73442A00539B33 /* WhisperKit in Frameworks */,
 				BDECEA462CDE7544007BBCF6 /* BlinkFileProvider.framework in Frameworks */,
 				D24AFD58222410E700CFD3C1 /* MBProgressHUD.framework in Frameworks */,
 				BD801D202C9352E800556515 /* curl_ios.xcframework in Frameworks */,
@@ -2383,6 +2395,10 @@
 		EA0BA1821C0CC57B00719C1A = {
 			isa = PBXGroup;
 			children = (
+				FDA7900EF5214C570CB4A947 /* AudioWaveformView.swift */,
+				04119E802F7344C900539B33 /* DictationManager.swift */,
+				04119E812F7344C900539B33 /* DictationSettings.swift */,
+				04119E7D2F7344A700539B33 /* KBKeyValue+Mic.swift */,
 				BDEEE36B2B8951D3003003FD /* get_frameworks.sh */,
 				D23FFC69261C2D46003E9227 /* template_setup.xcconfig */,
 				D27D01232615F1BD00128C23 /* developer_setup.xcconfig */,
@@ -2854,6 +2870,7 @@
 				D222780E2A26217A00D4C708 /* Runestone */,
 				BD792A4E2A3BDAAA009EE35F /* ZIPFoundation */,
 				BDFA97312D7F49EF0020BBF2 /* ConfettiSwiftUI */,
+				04119E792F73442A00539B33 /* WhisperKit */,
 			);
 			productName = Blink;
 			productReference = EA0BA18B1C0CC57B00719C1A /* Blink.app */;
@@ -2981,6 +2998,7 @@
 				BD792A4D2A3BDAAA009EE35F /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 				BD4DBAF82CADA82700538194 /* XCRemoteSwiftPackageReference "SQLite" */,
 				BDA35C972D7F4955004CD75C /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */,
+				04119E782F73442A00539B33 /* XCRemoteSwiftPackageReference "WhisperKit" */,
 			);
 			productRefGroup = EA0BA18C1C0CC57B00719C1A /* Products */;
 			projectDirPath = "";
@@ -3548,6 +3566,9 @@
 				BD818A0C2AB120B800956488 /* MoshServerParams.swift in Sources */,
 				D2C24418238E44AB0082C69C /* KBConfigView.swift in Sources */,
 				D2BF5F7F265BA0A80070F839 /* UserDefaults.swift in Sources */,
+				FDA7900EF5214C580CB4A947 /* AudioWaveformView.swift in Sources */,
+				04119E832F7344C900539B33 /* DictationManager.swift in Sources */,
+				04119E842F7344C900539B33 /* DictationSettings.swift in Sources */,
 				D2F330CA20A6CB840074ADD7 /* help.m in Sources */,
 				D28C357626A56DDF00202C4D /* FileProviderDomain.swift in Sources */,
 				D241CBD223040734003D64A5 /* KBDevice.swift in Sources */,
@@ -3646,6 +3667,7 @@
 				D241CBE6230562E9003D64A5 /* KBSizes.swift in Sources */,
 				D241CBD023040734003D64A5 /* KBKeyViewFlexible.swift in Sources */,
 				D22278002A26204900D4C708 /* Accumulators.swift in Sources */,
+				04119E7E2F7344A700539B33 /* KBKeyValue+Mic.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4263,7 +4285,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = A2H2CL32AG;
+				DEVELOPMENT_TEAM = Q3FXGBBT66;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -4324,7 +4346,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = A2H2CL32AG;
+				DEVELOPMENT_TEAM = Q3FXGBBT66;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -4376,7 +4398,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = A2H2CL32AG;
+				DEVELOPMENT_TEAM = Q3FXGBBT66;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -4417,7 +4439,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = A2H2CL32AG;
+				DEVELOPMENT_TEAM = Q3FXGBBT66;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -5037,7 +5059,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = A2H2CL32AG;
+				DEVELOPMENT_TEAM = Q3FXGBBT66;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -5075,7 +5097,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = A2H2CL32AG;
+				DEVELOPMENT_TEAM = Q3FXGBBT66;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
@@ -5192,7 +5214,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "$(TEAM_ID)";
+				DEVELOPMENT_TEAM = Q3FXGBBT66;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -5246,7 +5268,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "$(TEAM_ID)";
+				DEVELOPMENT_TEAM = Q3FXGBBT66;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -5283,7 +5305,7 @@
 				DEAD_CODE_STRIPPING = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = A2H2CL32AG;
+				DEVELOPMENT_TEAM = Q3FXGBBT66;
 				ENABLE_BITCODE = NO;
 				ENABLE_TESTABILITY = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -5335,7 +5357,7 @@
 				CURRENT_PROJECT_VERSION = 1085;
 				DEAD_CODE_STRIPPING = NO;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = A2H2CL32AG;
+				DEVELOPMENT_TEAM = Q3FXGBBT66;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
 				INFOPLIST_FILE = Blink/Info.plist;
@@ -5537,6 +5559,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		04119E782F73442A00539B33 /* XCRemoteSwiftPackageReference "WhisperKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/argmaxinc/WhisperKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.15.0;
+			};
+		};
 		BD4DBAF82CADA82700538194 /* XCRemoteSwiftPackageReference "SQLite" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/stephencelis/SQLite.swift";
@@ -5612,6 +5642,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		04119E792F73442A00539B33 /* WhisperKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 04119E782F73442A00539B33 /* XCRemoteSwiftPackageReference "WhisperKit" */;
+			productName = WhisperKit;
+		};
 		07FAB90E25C8E94E00E1CC2C /* ArgumentParser */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = ArgumentParser;

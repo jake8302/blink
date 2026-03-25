@@ -31,14 +31,33 @@
 
 import UIKit
 import Combine
+import MBProgressHUD
 
 
 @objc class SmarterTermInput: KBWebView {
-  
+
   var kbView = KBView()
   var _proxyBarButtonItem: UIBarButtonItem!
   var _barButtonItemGroup: UIBarButtonItemGroup!
-  
+  var _dictationHUD: MBProgressHUD?
+
+  private lazy var dictationManager: DictationManager = {
+      let manager = DictationManager()
+      manager.onTranscription = { [weak self] text in
+          self?.handleTranscription(text)
+      }
+      manager.onStateChange = { [weak self] state in
+          self?.handleDictationStateChange(state)
+      }
+      manager.onAudioLevel = { [weak self] level in
+          self?._waveformView?.updateLevel(level)
+      }
+      manager.onError = { [weak self] message in
+          print("[Dictation] Error: \(message)")
+      }
+      return manager
+  }()
+
   lazy var _kbProxy: KBProxy = {
     KBProxy(kbView: self.kbView)
   }()
@@ -328,6 +347,12 @@ extension SmarterTermInput {
   
   override func onCommand(_ command: String) {
     kbView.turnOffUntracked()
+
+    if command == "toggleDictation" {
+        dictationManager.toggle()
+        return
+    }
+
     guard
       let device = device,
       let scene = device.view.window?.windowScene,
@@ -337,7 +362,7 @@ extension SmarterTermInput {
     else {
       return
     }
-    
+
     spCtrl._onCommand(cmd)
   }
   
@@ -565,14 +590,135 @@ class VSCodeInput: SmarterTermInput {
   override func shouldUseWKCopyAndPaste() -> Bool {
     true
   }
-  
+
   override func canBeFocused() -> Bool {
     let res = super.canBeFocused()
-   
+
     if res == false {
       return KBTracker.shared.input == self
     }
-    
+
     return res
   }
+}
+
+// MARK: - Dictation
+
+extension SmarterTermInput {
+    private var _micSpinner: UIActivityIndicatorView? {
+        get { objc_getAssociatedObject(self, &AssociatedKeys.micSpinner) as? UIActivityIndicatorView }
+        set { objc_setAssociatedObject(self, &AssociatedKeys.micSpinner, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+    }
+
+    var _waveformView: AudioWaveformView? {
+        get { objc_getAssociatedObject(self, &AssociatedKeys.waveform) as? AudioWaveformView }
+        set { objc_setAssociatedObject(self, &AssociatedKeys.waveform, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+    }
+
+    func handleTranscription(_ text: String) {
+        guard !text.isEmpty else { return }
+        sendDictationText(text)
+    }
+
+    func handleDictationStateChange(_ state: DictationManager.State) {
+        let dictationState: KBKeyValue.DictationState
+        switch state {
+        case .idle:
+            dictationState = .idle
+            _dictationHUD?.hide(animated: true)
+            _dictationHUD = nil
+        case .downloading(let p):
+            dictationState = .downloading(progress: p)
+            showDownloadProgress(p)
+        case .recording:
+            dictationState = .recording
+            _dictationHUD?.hide(animated: true)
+            _dictationHUD = nil
+        case .transcribing:
+            dictationState = .transcribing
+        }
+
+        updateMicButton(for: dictationState)
+    }
+
+    private func showDownloadProgress(_ progress: Double) {
+        guard let spCtrl = spaceController else { return }
+        if _dictationHUD == nil {
+            let hud = MBProgressHUD.showAdded(to: spCtrl.view, animated: true)
+            hud.mode = .indeterminate
+            hud.label.text = "Loading speech model..."
+            hud.detailsLabel.text = "First launch may take a few minutes"
+            _dictationHUD = hud
+        }
+    }
+
+    func sendDictationText(_ text: String) {
+        let bracketedPaste = "\u{1b}[200~\(text)\u{1b}[201~"
+        onOut(bracketedPaste)
+    }
+
+    private func findMicView(in view: UIView) -> KBKeyViewSymbol? {
+        for subview in view.subviews {
+            if let keyView = subview as? KBKeyViewSymbol,
+               keyView.key.shape.primaryValue == .mic {
+                return keyView
+            }
+            if let found = findMicView(in: subview) {
+                return found
+            }
+        }
+        return nil
+    }
+
+    private func updateMicButton(for state: KBKeyValue.DictationState) {
+        guard let micView = findMicView(in: kbView) else { return }
+
+        switch state {
+        case .recording:
+            micView._imageView.isHidden = true
+            removeSpinner()
+            if _waveformView == nil {
+                let wv = AudioWaveformView(frame: micView.bounds.insetBy(dx: 4, dy: 6))
+                wv.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+                micView.addSubview(wv)
+                _waveformView = wv
+            }
+        case .transcribing:
+            micView._imageView.isHidden = true
+            removeWaveform()
+            if _micSpinner == nil {
+                let spinner = UIActivityIndicatorView(style: .medium)
+                spinner.color = .label
+                micView.addSubview(spinner)
+                spinner.center = CGPoint(x: micView.bounds.midX, y: micView.bounds.midY)
+                spinner.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin, .flexibleTopMargin, .flexibleBottomMargin]
+                _micSpinner = spinner
+            }
+            _micSpinner?.startAnimating()
+        default:
+            removeSpinner()
+            removeWaveform()
+            micView._imageView.isHidden = false
+            let symbolName = KBKeyValue.micSymbolName(for: state)
+            micView._imageView.image = UIImage(systemName: symbolName)
+            micView._imageView.tintColor = KBKeyValue.micTintColor(for: state)
+        }
+    }
+
+    private func removeSpinner() {
+        _micSpinner?.stopAnimating()
+        _micSpinner?.removeFromSuperview()
+        _micSpinner = nil
+    }
+
+    private func removeWaveform() {
+        _waveformView?.stopAnimating()
+        _waveformView?.removeFromSuperview()
+        _waveformView = nil
+    }
+}
+
+private enum AssociatedKeys {
+    static var micSpinner = 0
+    static var waveform = 0
 }

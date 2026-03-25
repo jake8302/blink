@@ -90,6 +90,7 @@ extension KBLayout {
       .flexKey(.esc,  traits: .default - .cmdOn - .skb + .hkb + .suggestionsOn),
     ],
     [
+      .icon(.mic, traits: .default),
       .arrows(traits: .default - .cmdOn),
       .wideKey(.cmd, traits: .default + .hkb),
     ])
@@ -173,12 +174,13 @@ extension KBLayout {
    ], [
      .icon(   .copy,  traits: .all - .selectionOff - .skb),
      .icon(   .paste, traits: .all - .clipboardOff - .skb),
+     .icon(   .mic,   traits: .default),
      .arrows(traits: .default - .cmdOn),
      .wideKey(    .cmd,   traits: .default + .hkb),
      .icon(   .cmd,   traits: .defaultSuggestionsOnly + .hkb),
    ])
   }
-  
+
   // MARK: iPad 10.5"
   
   static func _iPad_10_5_middle(lang: String) -> [KBKey] {
@@ -258,12 +260,13 @@ extension KBLayout {
     ], [
       .icon(.copy,  traits: .all - .selectionOff - .skb),
       .icon(.paste, traits: .all - .clipboardOff - .skb),
+      .icon(.mic,   traits: .default),
       .arrows(traits: .default - .cmdOn),
       .wideKey(    .cmd,   traits: .default + .hkb),
       .icon(.cmd,    traits: .defaultSuggestionsOnly + .hkb),
     ])
   }
-  
+
   // MARK: iPad 11"
   
   static func _iPad_11_middle(lang: String) -> [KBKey] {
@@ -339,10 +342,7 @@ extension KBLayout {
     ], [
       .icon(   .copy,  traits: .all - .selectionOff - .skb),
       .icon(   .paste, traits: .all - .clipboardOff - .skb),
-//      .key(    .left,  traits: .default),
-//      .key(    .down,  traits: .default),
-//      .key(    .up,    traits: .default),
-//      .key(    .right, traits: .default),
+      .icon(   .mic,   traits: .default),
       .arrows(traits: .default - .cmdOn),
 
       .wideKey(.cmd,   traits: .default),
@@ -350,7 +350,7 @@ extension KBLayout {
       .icon(   .cmd,   traits: .defaultSuggestionsOnly + .hkb),
     ])
   }
-  
+
   // MARK: iPad 12.9"
   
   static func _iPad_12_9_middle(lang: String) -> [KBKey] {
@@ -422,6 +422,7 @@ extension KBLayout {
     ], [
       .icon(.copy,  traits: .all - .selectionOff - .skb),
       .icon(.paste, traits: .all - .clipboardOff - .skb),
+      .icon(.mic,   traits: .default),
       .key(.left,   traits: .default),
       .key(.down,   traits: .default),
       .key(.up,     traits: .default),

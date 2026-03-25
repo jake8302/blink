@@ -122,6 +122,8 @@
 	<string>keyboard</string>
 	<key>NSCameraUsageDescription</key>
 	<string>to show FaceCam widget</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Blink uses the microphone for voice dictation in the terminal.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Use Face ID with Auto Lock</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

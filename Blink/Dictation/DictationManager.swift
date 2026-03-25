@@ -113,7 +113,7 @@ class DictationManager {
                     prewarm: true
                 )
                 let pipe = try await WhisperKit(config)
-                print("[Dictation] Model loaded: \(pipe.modelVariant) from \(pipe.modelFolder?.lastPathComponent ?? "unknown")")
+                print("[Dictation] Model loaded: variant=\(pipe.modelVariant) folder=\(pipe.modelFolder?.lastPathComponent ?? "nil")")
                 await MainActor.run {
                     self?.whisperKit = pipe
                     self?.setState(.idle)
@@ -179,20 +179,20 @@ class DictationManager {
             [weak self] buffer, _ in
             try? self?.audioFile?.write(from: buffer)
 
-            guard let channelData = buffer.floatChannelData?[0] else { return }
+            guard let self, let channelData = buffer.floatChannelData?[0] else { return }
             var rms: Float = 0
             vDSP_rmsqv(channelData, 1, &rms, vDSP_Length(buffer.frameLength))
 
             // Adaptive dB scaling — normalize against rolling noise floor
-            self?.recentRMSValues.append(rms)
-            if (self?.recentRMSValues.count ?? 0) > 20 {
-                self?.recentRMSValues.removeFirst()
+            self.recentRMSValues.append(rms)
+            if self.recentRMSValues.count > 20 {
+                self.recentRMSValues.removeFirst()
             }
-            let noiseFloor = self?.recentRMSValues.min() ?? 1e-3
+            let noiseFloor = self.recentRMSValues.min() ?? 1e-3
             let signalDB = 20 * log10(max(rms, 1e-8))
             let noiseDB = 20 * log10(max(noiseFloor, 1e-8))
             let level = max(0, min(1, (signalDB - noiseDB) / max(1, -noiseDB)))
-            DispatchQueue.main.async { self?.onAudioLevel?(level) }
+            DispatchQueue.main.async { self.onAudioLevel?(level) }
         }
 
         do {
@@ -211,7 +211,7 @@ class DictationManager {
     private func stopRecordingAndTranscribe() {
         stopAudioEngine()
         restoreAudioSession()
-        audioFile = nil  // close the file for reading
+        audioFile = nil
 
         guard let url = recordingURL else {
             onTranscription?("")
@@ -226,29 +226,48 @@ class DictationManager {
             do {
                 print("[Dictation] Starting transcription of \(url.lastPathComponent)")
 
-                // Tokenize technical vocabulary prompt for better accuracy on coding terms
-                let promptTokens = pipe.tokenizer?.encode(
-                    text: Self.technicalPrompt
-                ).filter { $0 < 51865 }  // keep only non-special tokens
-
                 let options = DecodingOptions(
                     language: "en",
                     temperature: 0.0,
                     skipSpecialTokens: true,
-                    promptTokens: promptTokens,
-                    firstTokenLogProbThreshold: nil  // required when using promptTokens (Issue #372)
+                    suppressBlank: true
                 )
-                let results: [TranscriptionResult] = try await pipe.transcribe(
+                var results: [TranscriptionResult] = try await pipe.transcribe(
                     audioPath: url.path,
                     decodeOptions: options
                 )
+
+                // Retry once if decoder produced zero tokens (avgLogProb=0.0 with empty text)
+                let allEmpty = results.allSatisfy { $0.segments.allSatisfy { $0.avgLogprob == 0.0 && $0.text.trimmingCharacters(in: .whitespaces).isEmpty } }
+                if allEmpty {
+                    print("[Dictation] All segments empty — retrying transcription")
+                    results = try await pipe.transcribe(
+                        audioPath: url.path,
+                        decodeOptions: options
+                    )
+                }
                 print("[Dictation] Transcription complete: \(results.count) result(s)")
+                for (i, r) in results.enumerated() {
+                    for (j, seg) in r.segments.enumerated() {
+                        print("[Dictation]   [\(i)/\(j)] noSpeech=\(seg.noSpeechProb) avgLogProb=\(seg.avgLogprob) text=\(seg.text)")
+                    }
+                    if r.segments.isEmpty {
+                        print("[Dictation]   [\(i)] no segments (all filtered as silence)")
+                    }
+                }
                 let rawText = results.map(\.text).joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
+                print("[Dictation] Raw: \(rawText.isEmpty ? "(empty)" : rawText)")
                 let text = Self.cleanTranscription(Self.stripHallucinations(rawText))
-                print("[Dictation] Text: \(text)")
+                if text != rawText {
+                    print("[Dictation] After cleaning: \(text.isEmpty ? "(all stripped)" : text)")
+                }
                 await MainActor.run {
                     self.cleanupRecordingFile()
-                    self.onTranscription?(text)
+                    if text.isEmpty {
+                        self.onError?("Couldn't make out any words. Please try again.")
+                    } else {
+                        self.onTranscription?(text)
+                    }
                     self.setState(.idle)
                 }
             } catch {
@@ -288,14 +307,6 @@ class DictationManager {
 
     // MARK: - Transcription Processing
 
-    private static let technicalPrompt = """
-        Claude Code, git commit, npm install, TypeScript, Python, async await, \
-        function, variable, refactor, API endpoint, database, migration, \
-        pull request, merge conflict, terminal, SSH, Mosh, tmux session, \
-        fix the bug in, add a new feature to, remove the unused, update the \
-        configuration for, can you help me with, please refactor this to use
-        """
-
     private static func stripHallucinations(_ text: String) -> String {
         let hallucinations = [
             "thank you for watching",
@@ -327,6 +338,14 @@ class DictationManager {
 
     private static func cleanTranscription(_ text: String) -> String {
         var result = text
+
+        // Remove Whisper non-speech output: *Sprick*, *laughing*, [BLANK_AUDIO], lone dashes/dots
+        result = result.replacingOccurrences(
+            of: "\\*[^*]+\\*|\\[BLANK_AUDIO\\]",
+            with: "",
+            options: .regularExpression
+        )
+        result = result.trimmingCharacters(in: CharacterSet(charactersIn: "-–—.… "))
 
         result = result.replacingOccurrences(
             of: "\\b(um|uh|hmm|mm|mhm|mmm|ah|oh|er)\\b,?",

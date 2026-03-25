@@ -1,3 +1,4 @@
+import Accelerate
 import AVFoundation
 import WhisperKit
 
@@ -23,6 +24,7 @@ class DictationManager {
     private var previousAudioOptions: AVAudioSession.CategoryOptions?
     private var previousAudioMode: AVAudioSession.Mode?
     private var transcriptionTask: Task<Void, Never>?
+    private var recentRMSValues: [Float] = []
 
     // MARK: - Public API
 
@@ -135,14 +137,29 @@ class DictationManager {
             previousAudioOptions = session.categoryOptions
             previousAudioMode = session.mode
 
-            try session.setCategory(.record, mode: .measurement)
+            try session.setCategory(.record, mode: .default)
             try session.setActive(true)
+
+            // Always use built-in mic with wide pickup for best transcription quality
+            if let builtIn = session.availableInputs?.first(where: { $0.portType == .builtInMic }) {
+                // 1. Select front mic data source with omnidirectional polar pattern
+                if let dataSource = builtIn.dataSources?.first(where: {
+                    $0.orientation == .front &&
+                    $0.supportedPolarPatterns?.contains(.omnidirectional) == true
+                }) {
+                    try builtIn.setPreferredDataSource(dataSource)
+                    try dataSource.setPreferredPolarPattern(.omnidirectional)
+                }
+                // 2. Activate the port last
+                try session.setPreferredInput(builtIn)
+            }
         } catch {
             onError?("Audio session setup failed: \(error.localizedDescription)")
             setState(.idle)
             return
         }
 
+        recentRMSValues = []
         let engine = AVAudioEngine()
         let inputNode = engine.inputNode
         let nativeFormat = inputNode.outputFormat(forBus: 0)
@@ -163,11 +180,18 @@ class DictationManager {
             try? self?.audioFile?.write(from: buffer)
 
             guard let channelData = buffer.floatChannelData?[0] else { return }
-            let frames = Int(buffer.frameLength)
-            var sumSquares: Float = 0
-            for i in 0..<frames { sumSquares += channelData[i] * channelData[i] }
-            let rms = sqrtf(sumSquares / Float(max(frames, 1)))
-            let level = max(0, min(1, rms * 5))
+            var rms: Float = 0
+            vDSP_rmsqv(channelData, 1, &rms, vDSP_Length(buffer.frameLength))
+
+            // Adaptive dB scaling — normalize against rolling noise floor
+            self?.recentRMSValues.append(rms)
+            if (self?.recentRMSValues.count ?? 0) > 20 {
+                self?.recentRMSValues.removeFirst()
+            }
+            let noiseFloor = self?.recentRMSValues.min() ?? 1e-3
+            let signalDB = 20 * log10(max(rms, 1e-8))
+            let noiseDB = 20 * log10(max(noiseFloor, 1e-8))
+            let level = max(0, min(1, (signalDB - noiseDB) / max(1, -noiseDB)))
             DispatchQueue.main.async { self?.onAudioLevel?(level) }
         }
 
@@ -288,10 +312,10 @@ class DictationManager {
         ]
 
         var result = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        let lower = result.lowercased()
+            .trimmingCharacters(in: CharacterSet(charactersIn: ".,!?"))
 
         for phrase in hallucinations {
-            if lower.hasSuffix(phrase) {
+            if result.lowercased().hasSuffix(phrase) {
                 result = String(result.dropLast(phrase.count))
                     .trimmingCharacters(in: .whitespacesAndNewlines)
                     .trimmingCharacters(in: CharacterSet(charactersIn: ".,!?"))
